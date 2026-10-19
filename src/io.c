@@ -1,16 +1,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/types.h>
+#include "io.h"
 
-// 1. function takes in 3 params.
-//  fd -> file descriptor (ticket number for the pipe | hand back to read())
-//  buf -> buffer (a destination, owned by caller)
-//  n -> how many bytes our caller needs
-//
-// Our functions contract states:
-// return n if we've gotten exactly n bytes
-// return 0 on clean EOF
-// return -1 on real failure
 ssize_t read_exact(int fd, void *buf, size_t n) {
 
     size_t got = 0; // runnning total of bytes across all calls
