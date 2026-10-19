@@ -1,9 +1,7 @@
 #ifndef IO_H
 #define IO_H
 
-#include <stddef.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 // read_exact: read exactly n bytes from fd into buf, even if read() delivers them in pieces.
 //   fd -> file descriptor to read from
