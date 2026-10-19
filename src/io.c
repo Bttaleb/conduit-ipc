@@ -8,7 +8,7 @@ ssize_t read_exact(int fd, void *buf, size_t n) {
     size_t got = 0; // runnning total of bytes across all calls
     while (got < n) { // loop until we've obtained all bytes
 
-        ssize_t r = read(fd, (char *)buf + got, n - got); // assign how many bytes returned from our call to `r`
+        ssize_t r = read(fd, (char *)buf, n - got); // assign how many bytes returned from our call to `r`
 
         if (r < 0) { // Handle fatal errors, retry
             if (errno == EINTR) {
