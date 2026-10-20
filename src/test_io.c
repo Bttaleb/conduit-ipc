@@ -94,7 +94,7 @@ static void test_clean_eof(void) {
         ssize_t ret = read_exact(fds[0], buf, 10);
 
         if (ret == 0) {
-            printf("PASS: Clean EOF\n");
+            printf("PASS: clean EOF\n");
         } else {
             printf("FAIL: clean EOF (expected ret=0, got ret=%zd)\n", ret);
             close(fds[0]);
@@ -140,7 +140,6 @@ static void test_truncated_eof(void) {
             printf("PASS: Truncated EOF check\n");
         } else {
             printf("FAIL: truncated EOF (expected ret=-1, got ret=%zd)\n", ret);
-            close(fds[0]);
         }
 
         close(fds[0]);
