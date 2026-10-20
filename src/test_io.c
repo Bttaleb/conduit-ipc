@@ -1,9 +1,11 @@
 #include "io.h"
 #include <string.h>
 #include <stdio.h>
+#include <sys/_types/_ssize_t.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
+// Test 1: return n on success
 static void test_chunked_read(void) {
 
     // create pipe
@@ -55,7 +57,7 @@ static void test_chunked_read(void) {
         if (ret == 10 && memcmp(buf, "ABCDEFGHIJ", 10) == 0) {
             printf("PASS: chunked read\n");
         } else {
-            printf("FAIL: chunked read\n");
+            printf("FAIL: chunked read (ret=%zd, buf='%.*s')\n", ret, 10, buf);
         }
 
         close(fds[0]);
@@ -63,6 +65,55 @@ static void test_chunked_read(void) {
     }
 }
 
+// Test 2: return 0 on clean EOF
+// when does this happen?
+// when the child writes nothing and closes, the parent will ask for 10, read_exact will return 0
+static void test_clean_eof(void) {
+    int fds[2];
+
+    if (pipe(fds) < 0) {
+        perror("pipe");
+        return;
+    }
+
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        perror("fork");
+        return;
+    }
+
+    if (pid == 0) {
+
+        close(fds[0]);
+
+        close(fds[1]);
+
+        _exit(0);
+    }
+
+    if (pid > 0) {
+
+        close(fds[1]);
+
+        char buf[10];
+
+        ssize_t ret = read_exact(fds[0], buf, 10);
+
+        if (ret == 0) {
+            printf("PASS: Clean EOF\n");
+        } else {
+            printf("FAIL: clean EOF (expected ret=0, got ret=%zd)\n", ret);
+            close(fds[0]);
+        }
+
+        close(fds[0]);
+        waitpid(pid, NULL, 0);
+    }
+}
+
+
 int main(void) {
     test_chunked_read();
+    test_clean_eof();
 }
