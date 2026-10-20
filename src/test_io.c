@@ -1,12 +1,13 @@
 #include "io.h"
 #include <_string.h>
+#include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <sys/_types/_ssize_t.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
-// Test 1: return n on success
+ // Test 1: return n on success
 static void test_chunked_read(void) {
 
     // create pipe
@@ -18,7 +19,7 @@ static void test_chunked_read(void) {
         return;
     }
 
-    // fork & branch -> parent if pid > 0 | child if pid == 0
+    // fork & branch -> parent if pid > 0 (reads) | child if pid == 0 (writes)
     pid_t pid = fork();
 
     if (pid < 0) {
@@ -34,7 +35,6 @@ static void test_chunked_read(void) {
 
         // write the 4 byte string-"ABCD" into the pipe
         write(fds[1], "ABCD", 4);
-        //simulate work
         usleep(1000);
 
         write(fds[1], "EFG", 3);
@@ -54,6 +54,7 @@ static void test_chunked_read(void) {
         char buf[10];
         ssize_t ret = read_exact(fds[0], buf, 10);
 
+        // if we've returned 10 bytes and those bytes match the ones in our buffer then we pass
         if (ret == 10 && memcmp(buf, "ABCDEFGHIJ", 10) == 0) {
             printf("PASS: chunked read\n");
         } else {
@@ -147,8 +148,22 @@ static void test_truncated_eof(void) {
     }
 }
 
+static void test_bad_fd(void) {
+    char buf[10];
+    ssize_t ret = read_exact(-1, buf, 10);
+
+    if (ret < 0 && errno == EBADF) {
+        printf("real error\n");
+    } else {
+        printf("FAIL: bad fd (expected ret=-1, got ret=%zd\n", ret);
+    }
+
+}
+
+
 int main(void) {
     test_chunked_read();
     test_clean_eof();
     test_truncated_eof();
+    test_bad_fd();
 }

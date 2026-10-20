@@ -23,7 +23,6 @@ ssize_t read_exact(int fd, void *buf, size_t n) {
             }
             return -1; // if got != 0 we return an error
         }
-
         got += r;
     }
     return n;
@@ -46,7 +45,6 @@ ssize_t write_all(int fd, const void *buf, size_t n) {
             errno = EIO;
             return -1;
         }
-
         sent += w;
     }
     return n;
