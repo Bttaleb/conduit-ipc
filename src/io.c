@@ -19,7 +19,7 @@ ssize_t read_exact(int fd, void *buf, size_t n) {
 
         if (r == 0) { // EOF
             if (got == 0) {
-                return -1;
+                return 0;
             }
             return -1; // if got != 0 we return an error
         }
