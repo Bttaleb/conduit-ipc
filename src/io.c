@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include "io.h"
+#include <stdio.h>
 
 ssize_t read_exact(int fd, void *buf, size_t n) {
 
