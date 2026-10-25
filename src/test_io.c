@@ -97,7 +97,7 @@ static void test_write_all_success(void) {
         ssize_t ret = write_all(fds[1], "ABCDEFGHIJ", 10);
         close(fds[1]);
         waitpid(pid, &status, 0);
-        if (ret == 10 && WIFEXITED(status) && WEXITSTATUS(status)) {
+        if (ret == 10 && WIFEXITED(status) && WEXITSTATUS(status) == 0) {
             printf("PASS: write all test\n");
         } else {
             printf("FAIL: write all test expected ret=10, got ret=%zd, child exit=%d\n", ret, WIFEXITED(status) ? WEXITSTATUS(status) : -1);
@@ -107,7 +107,7 @@ static void test_write_all_success(void) {
     if (pid == 0) {
         close(fds[1]);
         ssize_t r = read_exact(fds[0], buf, 10);
-        if (r == 10 && memcmp(buf, "ABCDEFGHIJ", 10)) {
+        if (r == 10 && memcmp(buf, "ABCDEFGHIJ", 10) == 0) {
             _exit(0);
         } else {
             _exit(1);
@@ -154,9 +154,9 @@ static void test_write_all_bad_fd(void) {
     char buf[10];
     ssize_t w = write_all(-1,"ABC", 3);
     if (w < 0 && errno == EBADF) {
-        printf("PASS: write all bad fd");
+        printf("PASS: write all bad fd\n");
     } else {
-        printf("FAIL: write all bad fd expected w=-1, got w=%zd", w);
+        printf("FAIL: write all bad fd expected w=-1, got w=%zd\n", w);
     }
 }
 
