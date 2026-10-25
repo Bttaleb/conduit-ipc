@@ -2,7 +2,6 @@
 #include <errno.h>
 #include <sys/types.h>
 #include "io.h"
-#include <stdio.h>
 
 ssize_t read_exact(int fd, void *buf, size_t n) {
 
@@ -34,7 +33,6 @@ ssize_t write_all(int fd, const void *buf, size_t n) {
     size_t sent = 0;
     while (sent < n) {
         ssize_t w = write(fd, (const char *)buf + sent, n - sent);
-
         if (w < 0) {
             if (errno == EINTR) {
                 continue;

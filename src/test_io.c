@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <sys/_types/_pid_t.h>
 #include <sys/_types/_ssize_t.h>
+#include <sys/signal.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
@@ -97,9 +98,9 @@ static void test_write_all_success(void) {
         close(fds[1]);
         waitpid(pid, &status, 0);
         if (ret == 10 && WIFEXITED(status) && WEXITSTATUS(status)) {
-            printf("PASS: write all test");
+            printf("PASS: write all test\n");
         } else {
-            printf("FAIL: write all test");
+            printf("FAIL: write all test expected ret=10, got ret=%zd, child exit=%d\n", ret, WIFEXITED(status) ? WEXITSTATUS(status) : -1);
         }
     }
 
@@ -114,11 +115,59 @@ static void test_write_all_success(void) {
     }
 }
 
+static void test_write_all_epipe(void) {
+     int fds[2];
+
+     if (pipe(fds) < 0) {
+         perror("pipe");
+         return;
+     }
+
+     pid_t pid = fork();
+
+     if (pid < 0) {
+         perror("fork");
+         return;
+     }
+
+     if (pid > 0) {
+         close(fds[0]);
+         waitpid(pid, NULL, 0);
+         ssize_t ret = write_all(fds[1], "ABC", 3);
+
+         if (ret == -1 && errno == EPIPE) {
+             printf("PASS: write_all epipe\n");
+         } else {
+             printf("FAIL: write_all epipe expected ret=-1 EPIPE, got ret=%zd, errno=%s\n", ret, strerror(errno));
+         }
+         close(fds[1]);
+     }
+
+     if (pid == 0) {
+         close(fds[0]);
+         close(fds[1]);
+         _exit(0);
+     }
+}
+
+static void test_write_all_bad_fd(void) {
+    char buf[10];
+    ssize_t w = write_all(-1,"ABC", 3);
+    if (w < 0 && errno == EBADF) {
+        printf("PASS: write all bad fd");
+    } else {
+        printf("FAIL: write all bad fd expected w=-1, got w=%zd", w);
+    }
+}
+
 int main(void) {
+    signal(SIGPIPE, SIG_IGN);
     const char *chunked[] = {"ABCD", "EFG", "HIJ"};
     run_read_case("chunked read", chunked, 3, 10, 10, "ABCDEFGHIJ"); // sends all three
     run_read_case("clean eof", NULL, 0, 10, 0, NULL); // sends nothing
     run_read_case("truncated eof check", chunked, 1, 10, -1, NULL); // sends only "ABCD" (4 of 10)
     test_bad_fd();
     test_write_all_success();
+    test_write_all_epipe();
+    test_write_all_bad_fd();
 }
