@@ -4,10 +4,8 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
-#include <sys/_types/_pid_t.h>
-#include <sys/_types/_ssize_t.h>
-#include <sys/signal.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/wait.h>
 
 static void run_read_case(const char *name, const char *chunks[], size_t nchunks, size_t ask_n, ssize_t expect_ret, const char *expect_buf) {
@@ -151,7 +149,6 @@ static void test_write_all_epipe(void) {
 }
 
 static void test_write_all_bad_fd(void) {
-    char buf[10];
     ssize_t w = write_all(-1,"ABC", 3);
     if (w < 0 && errno == EBADF) {
         printf("PASS: write all bad fd\n");
