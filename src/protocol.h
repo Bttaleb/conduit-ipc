@@ -10,6 +10,7 @@
 // Every payload is at least 4 bytes (job_id) so len == 0 is malformed
 
 // 2. CONSTANTS
+
 enum {
     MSG_JOB     = 1,
     MSG_RESULT  = 2
@@ -50,6 +51,7 @@ ssize_t send_msg(int fd, uint8_t type, const void *payload, uint32_t len);
 ssize_t recv_msg(int fd, uint8_t *type, void *buf, size_t cap);
 
 // 5. SERIALIZATION: struct <-> exact wire bytes
+
 // encode_result: write r into out at protocol offsets (0, 4, 12).
 //     - Writes exactly RESULT_PAYLOAD_SIZE
 void encode_result(const struct result *r, uint8_t *out);

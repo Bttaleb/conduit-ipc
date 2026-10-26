@@ -45,3 +45,44 @@ ssize_t send_msg(int fd, uint8_t type, const void *payload, uint32_t len) {
 
     return 0;
 }
+
+ssize_t recv_msg(int fd, uint8_t *type, void *buf, size_t cap) {
+    uint8_t header[HEADER_SIZE];
+    uint32_t len;
+
+    ssize_t h = read_exact(fd, header, HEADER_SIZE);
+
+    if (h == 0) {
+        return 0;
+    }
+
+    if (h < 0) {
+        return -1;
+    }
+
+    memcpy(&len, header + 0, sizeof(len));
+    *type = header[4];
+
+    if (len == 0) {
+        errno = EMSGSIZE;
+        return -1;
+    }
+
+    if (len > MAX_PAYLOAD) {
+        errno = EMSGSIZE;
+        return -1;
+    }
+
+    if (len > cap) {
+        errno = EMSGSIZE;
+        return -1;
+    }
+
+    ssize_t p = read_exact(fd, buf, len);
+    if (p != (ssize_t)len) {
+        return -1;
+    }
+
+    return len;
+
+}

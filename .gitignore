@@ -53,3 +53,4 @@ dkms.conf
 test_io
 .DS_Store
 tmp/
+test_protocol
