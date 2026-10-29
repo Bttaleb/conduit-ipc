@@ -73,7 +73,10 @@ ssize_t recv_msg(int fd, uint8_t *type, void *buf, size_t cap) {
         return -1;
     }
 
-
+    if (len > cap) {
+        errno = EMSGSIZE;
+        return -1;
+    }
 
     ssize_t p = read_exact(fd, buf, len);
     if (p != (ssize_t)len) {

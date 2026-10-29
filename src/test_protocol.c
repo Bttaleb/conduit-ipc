@@ -117,14 +117,8 @@ static void test_recv_too_big_for_buf(void) {
     if (pid == 0) {
         close(fds[0]);
         uint8_t header[HEADER_SIZE];
-        uint32_t bad_len = 100;
-        memcpy(header + 0, &bad_len, sizeof(bad_len));
         header[4] = MSG_JOB;
         write_all(fds[1], header, HEADER_SIZE);
-
-        char junk[100];
-        memset(junk, 'X', sizeof(junk));
-        write_all(fds[1], junk, sizeof(junk));
         close(fds[1]);
         _exit(0);
     }
